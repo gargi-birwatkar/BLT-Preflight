@@ -58,6 +58,10 @@ The system improves over time by:
 - Refining guidance based on effectiveness
 - Adapting to project-specific patterns
 
+### 🤖 AI-Powered Deep Analysis (Scout-Risk)
+Uses Gemini 2.5 Flash to analyze git diffs for OWASP security risks before commit.
+[See Scout-Risk setup ↓](#-scout-risk--ai-powered-deep-analysis)
+
 ## Quick Start
 
 ### As a Contributor
@@ -232,10 +236,15 @@ BLT-Preflight/
 ├── src/
 │   ├── advisory_engine/
 │   │   ├── __init__.py
-│   │   ├── core.py              # Core advisory engine
-│   │   ├── github_integration.py # GitHub API integration
-│   │   └── dashboard.py          # Maintainer dashboard
-│   └── blt_preflight.py          # CLI interface
+│   │   ├── core.py
+│   │   ├── github_integration.py
+│   │   ├── dashboard.py
+│   │   ├── ai_server.py          # Scout-Risk: FastAPI + Gemini 2.5 analysis
+│   │   └── ai_mapper.py          # Scout-Risk: live OWASP scraper
+│   └── blt_preflight.py
+├── scripts/
+│   └── setup_scout.py            # Scout-Risk: automated setup & git hook injector
+├── .env.example                  # Scout-Risk: API key template
 ├── config/
 │   ├── security_patterns.json    # Pattern definitions
 │   └── learning_data.json        # Learning loop data (generated)
@@ -278,6 +287,84 @@ Authentication changes require careful review
 - **Helpful Rate**: 85.7%
 - **Total Intents Captured**: 28
 - **Feedback (Last 7 Days)**: 8
+
+---
+
+## ✨ Scout-Risk — AI-Powered Deep Analysis
+
+> **Scout-Risk** is a Cognitive Advisory Engine integrated into the **BLT-Preflight** ecosystem. While standard checks rely on static file patterns, Scout-Risk uses **Gemini 2.0 Flash** to perform deep logical analysis of code changes (`git diff`) *before* they are committed.
+
+---
+
+### 🛡️ Why Scout-Risk?
+
+| Feature | Description |
+|---|---|
+| **Beyond Filenames** | Detects vulnerabilities like SQL Injection, XSS, and hardcoded secrets even in files with non-standard names (e.g., `utils.py`, `database_helper.py`, `weather_api.js`) |
+| **Live OWASP Mapping** | Dynamically scrapes and links findings to the latest [OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/) for real-time remediation guidance |
+| **Contextual Awareness** | Understands the *intent* of code to reduce false positives common in regex-based scanners |
+
+---
+
+### 🚀 Quick Start
+
+#### Step 1 — Run the Automated Setup
+
+Use the included setup script to inject the AI-powered git hook, configure your environment, **and automatically install all required dependencies**:
+
+```bash
+python scripts/setup_scout.py
+```
+
+> Follow the interactive prompts to set up a **virtual environment** *(recommended)* or install to your base Python.
+
+---
+
+#### Step 2 — Configure API Access
+
+Create a `.env` file in the root directory and add your Gemini API key:
+
+```env
+GEMINI_API_KEY=your_key_here
+```
+
+---
+
+#### Step 3 — Start the AI Advisory Server
+
+The AI engine runs as a lightweight **FastAPI** service. Start it in a separate terminal from the project root:
+
+```bash
+python -m uvicorn src.advisory_engine.ai_server:app --reload
+```
+
+---
+
+### 🛠️ How It Works
+
+Once the server is running, Scout-Risk intercepts your `git commit` command, analyzes your staged changes, and responds with one of two outcomes:
+
+| Result | Condition |
+|---|---|
+| ✅ **Commit Approved** | Risk level is assessed as **Low** or **Medium** |
+| ❌ **Commit Blocked** | A **High** or **Critical** security risk is detected — a detailed breakdown and direct fix links are printed to your terminal |
+
+---
+
+### 📂 Repository Structure
+
+```
+.
+├── src/
+│   └── advisory_engine/
+│       ├── ai_server.py       # FastAPI backend — handles Gemini 2.0 logic
+│       └── ai_mapper.py       # BeautifulSoup scraper for live OWASP docs
+├── scripts/
+│   └── setup_scout.py         # Interactive installer, git-hook injector & dependency manager
+└── requirements.txt           # Auto-populated by setup_scout.py (includes google-genai, fastapi)
+```
+
+---
 
 ## Contributing
 
