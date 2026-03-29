@@ -5,28 +5,21 @@
         "**/auth/**",
         "**/login/**",
         "**/password/**",
-        "**/session/**",
-        "**/otp/**",
-        "**/2fa/**",
-        "**/mfa/**",
-        "**/reset*password*",
-        "**/forgot*password*"
+        "**/session/**"
       ],
       "severity": "critical",
-      "guidance": "Authentication changes require careful security review.\n- Ensure proper password hashing (bcrypt/argon2)\n- Secure session management and expiry\n- MFA support and protection against brute force\n- Password reset tokens must be random, single-use, and short-lived\n- Protect against account enumeration"
+      "guidance": "Authentication changes require careful security review. Ensure proper password hashing, session management, and protection against brute force attacks. Aligns with A07:2025 - Authentication Failures: implement MFA support, secure session tokens, account lockout policies, and protection against credential stuffing and brute force attacks."
     },
     "api_keys": {
       "patterns": [
-        "**/*api_key*",
-        "**/*api-key*",
-        "*secret_key*",
-        "**/*client_secret*",
-        "**/*access_token*",
+        "**/*api*key*",
+        "**/*secret*",
+        "**/*token*",
         "**/*.env*",
         "**/config/**"
       ],
       "severity": "critical",
-      "guidance": "Never commit API keys, secrets, or tokens to version control.\n- Use environment variables or a secrets manager\n- Rotate any accidentally committed credentials immediately\n- Use tools like git-secrets or truffleHog to scan history"
+      "guidance": "Never commit API keys, secrets, or tokens to version control. Use environment variables or a secrets manager. Aligns with A02:2025 - Security Misconfiguration: ensure secrets are not exposed through default configurations, misconfigured cloud storage, or improperly set environment variables."
     },
     "database": {
       "patterns": [
@@ -36,7 +29,7 @@
         "**/*sql*"
       ],
       "severity": "warning",
-      "guidance": "Database changes should include security considerations.\n- Use parameterized queries or ORM — never raw SQL with user input\n- Apply proper access controls and least privilege\n- Ensure sensitive data is encrypted at rest"
+      "guidance": "Database changes should include security considerations like SQL injection prevention, proper access controls, and data encryption. Aligns with A05:2025 - Injection: use parameterized queries or prepared statements, validate all user-supplied input, and apply the principle of least privilege for database accounts."
     },
     "encryption": {
       "patterns": [
@@ -46,7 +39,7 @@
         "**/*cipher*"
       ],
       "severity": "critical",
-      "guidance": "Use established cryptographic libraries only.\n- Avoid custom encryption implementations\n- Use AES-256, RSA-2048+, bcrypt/argon2 for passwords\n- Ensure strong key lengths and proper key management\n- Enforce TLS 1.2+ for data in transit"
+      "guidance": "Use established cryptographic libraries and avoid creating custom encryption. Ensure strong key lengths and proper key management. Aligns with A04:2025 - Cryptographic Failures: avoid weak or deprecated algorithms (MD5, SHA1, DES), enforce TLS for data in transit, encrypt sensitive data at rest, and ensure proper key rotation and storage."
     },
     "file_upload": {
       "patterns": [
@@ -55,7 +48,7 @@
         "**/storage/**"
       ],
       "severity": "warning",
-      "guidance": "File upload functionality requires strict validation.\n- Validate file types, MIME types, and size limits\n- Store uploads outside the web root\n- Ensure uploaded files cannot be executed on the server"
+      "guidance": "File upload functionality requires validation of file types, size limits, and protection against malicious files. Aligns with A05:2025 - Injection and A01:2025 - Broken Access Control: validate MIME types server-side, store uploaded files outside the web root, scan for malware, and enforce strict access controls on uploaded content."
     },
     "api_endpoints": {
       "patterns": [
@@ -64,7 +57,7 @@
         "**/endpoints/**"
       ],
       "severity": "warning",
-      "guidance": "API endpoints should have proper controls.\n- Validate and sanitize all input\n- Enforce authentication and authorization on every endpoint\n- Apply rate limiting to prevent abuse\n- Check for BOLA (Broken Object Level Authorization)"
+      "guidance": "API endpoints should include proper input validation, rate limiting, authentication, and authorization checks. Aligns with A01:2025 - Broken Access Control: enforce server-side access controls, deny by default, validate object-level authorization, and guard against SSRF attacks originating from API calls to internal services."
     },
     "user_input": {
       "patterns": [
@@ -73,120 +66,169 @@
         "**/validation/**"
       ],
       "severity": "warning",
-      "guidance": "All user input must be validated and sanitized.\n- Prevent SQL, XSS, command, and template injection\n- Use allowlists over denylists for input validation\n- Encode output correctly for the rendering context"
+      "guidance": "All user input should be validated and sanitized to prevent injection attacks and XSS vulnerabilities. Aligns with A05:2025 - Injection and A10:2025 - Mishandling of Exceptional Conditions: implement allowlist-based input validation, encode output contextually, and handle malformed or unexpected input gracefully without exposing system details."
+    },
+    "configuration": {
+      "patterns": [
+        "**/config/**",
+        "**/*.config.*",
+        "**/*.yaml",
+        "**/*.yml",
+        "**/*.toml",
+        "**/*.ini",
+        "**/settings/**",
+        "**/infrastructure/**",
+        "**/terraform/**",
+        "**/helm/**",
+        "**/k8s/**",
+        "**/docker*"
+      ],
+      "severity": "critical",
+      "guidance": "Aligns with A02:2025 - Security Misconfiguration: review all configuration files for insecure defaults, unnecessary features or services, exposed default credentials, missing security headers, verbose error messages, and improperly configured cloud permissions. Apply the principle of least privilege to all service accounts and infrastructure components."
+    },
+    "supply_chain": {
+      "patterns": [
+        "**/package.json",
+        "**/package-lock.json",
+        "**/yarn.lock",
+        "**/requirements.txt",
+        "**/Pipfile*",
+        "**/pom.xml",
+        "**/build.gradle*",
+        "**/go.mod",
+        "**/go.sum",
+        "**/Gemfile*",
+        "**/Cargo.toml",
+        "**/Cargo.lock",
+        "**/.github/workflows/**",
+        "**/ci/**",
+        "**/cd/**",
+        "**/Dockerfile*",
+        "**/.npmrc",
+        "**/.pypirc"
+      ],
+      "severity": "critical",
+      "guidance": "Aligns with A03:2025 - Software Supply Chain Failures: audit all third-party dependencies for known CVEs using tools like npm audit, pip-audit, or Dependabot. Pin dependency versions, verify package integrity via checksums or signatures, monitor for dependency confusion attacks, and secure your CI/CD pipeline against unauthorized modifications or script injections."
     },
     "access_control": {
       "patterns": [
         "**/permissions/**",
         "**/roles/**",
+        "**/rbac/**",
         "**/acl/**",
         "**/middleware/**",
-        "**/decorators/**"
+        "**/guards/**",
+        "**/policies/**"
       ],
       "severity": "critical",
-      "guidance": "Access control must be enforced server-side on every request.\n- Apply principle of least privilege and deny by default\n- Check for IDOR (Insecure Direct Object Reference)\n- Log all access control failures\n- Avoid client-side only access checks"
+      "guidance": "Aligns with A01:2025 - Broken Access Control (ranked #1): enforce access control server-side on every request, implement deny-by-default, use role-based or attribute-based access control, prevent privilege escalation, protect against insecure direct object references (IDOR), validate CORS policies, and guard against SSRF which is now included in this category."
     },
-    "security_misconfiguration": {
+    "design_patterns": {
       "patterns": [
-        "**/settings.py",
-        "**/settings/**",
-        "**/*.yml",
-        "**/*.yaml",
-        "**/Dockerfile*",
-        "**/*.cfg",
-        "**/*.ini",
-        "**/nginx/**"
+        "**/architecture/**",
+        "**/design/**",
+        "**/threat_model*",
+        "**/security/**",
+        "**/patterns/**"
+      ],
+      "severity": "warning",
+      "guidance": "Aligns with A06:2025 - Insecure Design: perform threat modeling during the design phase, define security requirements early, use secure design patterns and reference architectures, and avoid relying solely on implementation-level controls to compensate for missing design-level safeguards."
+    },
+    "integrity": {
+      "patterns": [
+        "**/checksums/**",
+        "**/signatures/**",
+        "**/verification/**",
+        "**/deserialization/**",
+        "**/serialization/**",
+        "**/updates/**",
+        "**/plugins/**"
       ],
       "severity": "critical",
-      "guidance": "Misconfiguration is a leading cause of breaches.\n- Disable DEBUG mode in production\n- Remove default credentials and unused features\n- Set security headers: CSP, HSTS, X-Frame-Options\n- Ensure error messages do not expose stack traces externally"
+      "guidance": "Aligns with A08:2025 - Software or Data Integrity Failures: verify cryptographic signatures of software and data artifacts before use, avoid deserializing data from untrusted sources without validation, ensure auto-update and plugin mechanisms verify integrity before applying changes, and protect CI/CD pipelines from unauthorized code injection."
     },
-    "deserialization": {
+    "logging": {
       "patterns": [
-        "**/*serial*",
-        "**/*deserial*",
-        "**/*pickle*",
-        "**/*marshal*"
-      ],
-      "severity": "critical",
-      "guidance": "Unsafe deserialization can lead to remote code execution.\n- Never deserialize untrusted data with pickle or marshal\n- Use yaml.safe_load instead of yaml.load\n- Validate data integrity before deserialization\n- Prefer JSON over binary serialization for untrusted input"
-    },
-    "logging_monitoring": {
-      "patterns": [
+        "**/logs/**",
         "**/logging/**",
         "**/audit/**",
         "**/monitoring/**",
-        "**/telemetry/**"
+        "**/alerts/**",
+        "**/observability/**",
+        "**/siem/**"
       ],
       "severity": "warning",
-      "guidance": "Insufficient logging is a top OWASP risk.\n- Log all auth attempts, access failures, and sensitive operations\n- Never log passwords, tokens, or PII\n- Set up alerts for anomalous patterns\n- Ensure logs are tamper-proof and retained appropriately"
+      "guidance": "Aligns with A09:2025 - Security Logging and Alerting Failures: ensure all authentication attempts, access control failures, and input validation errors are logged with sufficient context. Configure alerts on suspicious patterns, protect log integrity, avoid logging sensitive data such as credentials or PII, and validate that logging pipelines function correctly in production."
     },
     "error_handling": {
       "patterns": [
+        "**/errors/**",
         "**/exceptions/**",
-        "**/*error_handler*",
-        "**/*exception*",
-        "**/handlers/**"
+        "**/handlers/**",
+        "**/middleware/**",
+        "**/fallback/**",
+        "**/retry/**"
       ],
       "severity": "warning",
-      "guidance": "Errors must fail securely.\n- Never expose stack traces or internal paths to end users\n- Use generic messages externally, detailed logs internally\n- Ensure exception paths do not leave the system in an insecure state"
+      "guidance": "Aligns with A10:2025 - Mishandling of Exceptional Conditions (new in 2025): implement consistent, secure error handling across the application. Avoid 'failing open' on errors, do not expose stack traces or internal details in error responses, handle all edge cases explicitly, and ensure exception paths enforce the same security controls as normal execution paths."
     }
   },
   "label_patterns": {
     "security": {
       "severity": "critical",
-      "guidance": "Security-related changes require thorough review and testing. Follow security best practices and consider potential attack vectors."
+      "guidance": "Security-related changes require thorough review and testing. Follow security best practices and consider potential attack vectors. Reference the full OWASP Top 10:2025 list during review, paying particular attention to A01 Broken Access Control, A02 Security Misconfiguration, and A07 Authentication Failures as the highest-prevalence categories."
     },
     "authentication": {
       "severity": "critical",
-      "guidance": "Authentication changes must follow security best practices including MFA support, secure session management, and protection against common attacks."
+      "guidance": "Authentication changes must follow security best practices including MFA support, secure session management, and protection against common attacks. Aligns with A07:2025 - Authentication Failures: prevent credential stuffing, enforce strong password policies, use secure session token generation and expiry, and consider standardized frameworks rather than custom auth implementations."
     },
     "authorization": {
       "severity": "critical",
-      "guidance": "Authorization changes should implement proper access controls, follow the principle of least privilege, and prevent privilege escalation."
+      "guidance": "Authorization changes should implement proper access controls, follow the principle of least privilege, and prevent privilege escalation. Aligns with A01:2025 - Broken Access Control: enforce authorization server-side on every request, use deny-by-default, validate object-level permissions, and protect against SSRF which is now categorized under broken access control."
     },
     "data-privacy": {
       "severity": "critical",
-      "guidance": "Ensure compliance with data privacy regulations (GDPR, CCPA, etc.). Implement proper data handling, encryption, and user consent mechanisms."
+      "guidance": "Ensure compliance with data privacy regulations (GDPR, CCPA, etc.). Implement proper data handling, encryption, and user consent mechanisms. Aligns with A04:2025 - Cryptographic Failures: identify sensitive data in transit and at rest, apply appropriate encryption, avoid caching sensitive data unnecessarily, and enforce strong TLS configurations."
     },
     "api": {
       "severity": "warning",
-      "guidance": "API changes should include proper input validation, rate limiting, versioning, and comprehensive documentation."
+      "guidance": "API changes should include proper input validation, rate limiting, versioning, and comprehensive documentation. Aligns with A01:2025 - Broken Access Control and A05:2025 - Injection: enforce per-endpoint authorization, validate and sanitize all inputs, apply rate limiting, and audit CORS and SSRF protections on all outbound API calls."
     },
     "vulnerability": {
       "severity": "critical",
-      "guidance": "Vulnerability fixes require careful testing and validation. Ensure the fix addresses the root cause and doesn't introduce new issues."
+      "guidance": "Vulnerability fixes require careful testing and validation. Ensure the fix addresses the root cause and doesn't introduce new issues. Reference the relevant OWASP Top 10:2025 category for root-cause remediation guidance, and verify the fix against all associated CWEs for that category."
     },
     "encryption": {
       "severity": "critical",
-      "guidance": "Encryption implementation should use industry-standard algorithms and proper key management. Avoid custom cryptography."
+      "guidance": "Encryption implementation should use industry-standard algorithms and proper key management. Avoid custom cryptography. Aligns with A04:2025 - Cryptographic Failures: use AES-256, RSA-2048+, or modern elliptic-curve algorithms; avoid MD5, SHA1, and DES; enforce TLS 1.2+ for all communications; and implement proper key rotation, storage, and access controls."
     },
     "dependencies": {
       "severity": "warning",
-      "guidance": "Dependency updates should be reviewed for known vulnerabilities. Use tools like npm audit or pip-audit to check for security issues."
+      "guidance": "Dependency updates should be reviewed for known vulnerabilities. Use tools like npm audit or pip-audit to check for security issues. Aligns with A03:2025 - Software Supply Chain Failures: pin versions, verify package integrity, monitor for typosquatting or dependency confusion attacks, and ensure your CI/CD pipeline validates dependency provenance before building or deploying."
     },
     "misconfiguration": {
       "severity": "critical",
-      "guidance": "Ensure no insecure defaults are left in place. Disable DEBUG mode, enforce HTTPS, set security headers, and validate all environment-specific configurations before deployment."
+      "guidance": "Aligns with A02:2025 - Security Misconfiguration (moved to #2 in 2025): review changes for insecure defaults, unnecessary enabled features, exposed administrative interfaces, missing HTTP security headers, overly permissive cloud IAM policies, and verbose error messages that reveal system internals."
     },
-    "injection": {
+    "supply-chain": {
       "severity": "critical",
-      "guidance": "Prevent all injection classes — SQL, XSS, command, LDAP, and template injection. Use parameterized queries, safe ORM usage, output encoding, and a strict Content Security Policy."
-    },
-    "logging": {
-      "severity": "warning",
-      "guidance": "Ensure security-relevant events are logged (auth failures, access denials, input validation failures). Do not log sensitive data. Set up alerting for anomalous patterns and ensure log integrity."
-    },
-    "error-handling": {
-      "severity": "warning",
-      "guidance": "Errors should fail securely. Never expose internal details to users. Use generic messages externally and structured logging internally."
+      "guidance": "Aligns with A03:2025 - Software Supply Chain Failures (new expansion in 2025): review changes to build pipelines, dependency manifests, container base images, or third-party integrations. Verify artifact integrity via signatures or checksums, audit transitive dependencies, and ensure CI/CD workflows cannot be tampered with by untrusted contributors."
     },
     "insecure-design": {
       "severity": "warning",
-      "guidance": "Flag design-level security flaws: missing rate limits, weak reset flows, absent threat modelling, or business logic that can be abused. Security must be designed in, not bolted on."
+      "guidance": "Aligns with A06:2025 - Insecure Design: flag architectural or design decisions that lack threat modeling, rely on security-by-obscurity, or omit required security controls at the design level. Encourage the use of secure design patterns, reference architectures, and proactive threat modeling sessions before implementation begins."
     },
-    "deserialization": {
+    "integrity": {
       "severity": "critical",
-      "guidance": "Avoid unsafe deserialization of untrusted data. Use safe parsers, validate data integrity before deserialization, and never use pickle or similar formats with user-controlled input."
+      "guidance": "Aligns with A08:2025 - Software or Data Integrity Failures: ensure all software artifacts, update packages, and deserialized data are integrity-verified before use. Protect pipelines from unauthorized modifications and avoid unsafe deserialization of data from untrusted sources."
+    },
+    "logging-alerting": {
+      "severity": "warning",
+      "guidance": "Aligns with A09:2025 - Security Logging and Alerting Failures: verify that logging covers authentication events, access control failures, and input validation errors with sufficient context. Confirm alerts are configured to trigger on security-relevant events and that the alerting pipeline itself is tested and monitored."
+    },
+    "error-handling": {
+      "severity": "warning",
+      "guidance": "Aligns with A10:2025 - Mishandling of Exceptional Conditions (new in 2025): review error and exception handling paths for insecure defaults, information leakage in error responses, 'fail open' conditions, and missing security enforcement in edge case flows. All exceptional conditions should fail securely."
     }
   }
 }
