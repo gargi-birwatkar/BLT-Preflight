@@ -5,21 +5,28 @@
         "**/auth/**",
         "**/login/**",
         "**/password/**",
-        "**/session/**"
+        "**/session/**",
+        "**/otp/**",
+        "**/2fa/**",
+        "**/mfa/**",
+        "**/reset*password*",
+        "**/forgot*password*"
       ],
       "severity": "critical",
-      "guidance": "Authentication changes require careful security review. Ensure proper password hashing, session management, and protection against brute force attacks."
+      "guidance": "Authentication changes require careful security review.\n- Ensure proper password hashing (bcrypt/argon2)\n- Secure session management and expiry\n- MFA support and protection against brute force\n- Password reset tokens must be random, single-use, and short-lived\n- Protect against account enumeration"
     },
     "api_keys": {
       "patterns": [
-        "**/*api*key*",
-        "**/*secret*",
-        "**/*token*",
+        "**/*api_key*",
+        "**/*api-key*",
+        "*secret_key*",
+        "**/*client_secret*",
+        "**/*access_token*",
         "**/*.env*",
         "**/config/**"
       ],
       "severity": "critical",
-      "guidance": "Never commit API keys, secrets, or tokens to version control. Use environment variables or a secrets manager."
+      "guidance": "Never commit API keys, secrets, or tokens to version control.\n- Use environment variables or a secrets manager\n- Rotate any accidentally committed credentials immediately\n- Use tools like git-secrets or truffleHog to scan history"
     },
     "database": {
       "patterns": [
@@ -29,7 +36,7 @@
         "**/*sql*"
       ],
       "severity": "warning",
-      "guidance": "Database changes should include security considerations like SQL injection prevention, proper access controls, and data encryption."
+      "guidance": "Database changes should include security considerations.\n- Use parameterized queries or ORM — never raw SQL with user input\n- Apply proper access controls and least privilege\n- Ensure sensitive data is encrypted at rest"
     },
     "encryption": {
       "patterns": [
@@ -39,7 +46,7 @@
         "**/*cipher*"
       ],
       "severity": "critical",
-      "guidance": "Use established cryptographic libraries and avoid creating custom encryption. Ensure strong key lengths and proper key management."
+      "guidance": "Use established cryptographic libraries only.\n- Avoid custom encryption implementations\n- Use AES-256, RSA-2048+, bcrypt/argon2 for passwords\n- Ensure strong key lengths and proper key management\n- Enforce TLS 1.2+ for data in transit"
     },
     "file_upload": {
       "patterns": [
@@ -48,7 +55,7 @@
         "**/storage/**"
       ],
       "severity": "warning",
-      "guidance": "File upload functionality requires validation of file types, size limits, and protection against malicious files."
+      "guidance": "File upload functionality requires strict validation.\n- Validate file types, MIME types, and size limits\n- Store uploads outside the web root\n- Ensure uploaded files cannot be executed on the server"
     },
     "api_endpoints": {
       "patterns": [
@@ -57,7 +64,7 @@
         "**/endpoints/**"
       ],
       "severity": "warning",
-      "guidance": "API endpoints should include proper input validation, rate limiting, authentication, and authorization checks."
+      "guidance": "API endpoints should have proper controls.\n- Validate and sanitize all input\n- Enforce authentication and authorization on every endpoint\n- Apply rate limiting to prevent abuse\n- Check for BOLA (Broken Object Level Authorization)"
     },
     "user_input": {
       "patterns": [
@@ -66,7 +73,62 @@
         "**/validation/**"
       ],
       "severity": "warning",
-      "guidance": "All user input should be validated and sanitized to prevent injection attacks and XSS vulnerabilities."
+      "guidance": "All user input must be validated and sanitized.\n- Prevent SQL, XSS, command, and template injection\n- Use allowlists over denylists for input validation\n- Encode output correctly for the rendering context"
+    },
+    "access_control": {
+      "patterns": [
+        "**/permissions/**",
+        "**/roles/**",
+        "**/acl/**",
+        "**/middleware/**",
+        "**/decorators/**"
+      ],
+      "severity": "critical",
+      "guidance": "Access control must be enforced server-side on every request.\n- Apply principle of least privilege and deny by default\n- Check for IDOR (Insecure Direct Object Reference)\n- Log all access control failures\n- Avoid client-side only access checks"
+    },
+    "security_misconfiguration": {
+      "patterns": [
+        "**/settings.py",
+        "**/settings/**",
+        "**/*.yml",
+        "**/*.yaml",
+        "**/Dockerfile*",
+        "**/*.cfg",
+        "**/*.ini",
+        "**/nginx/**"
+      ],
+      "severity": "critical",
+      "guidance": "Misconfiguration is a leading cause of breaches.\n- Disable DEBUG mode in production\n- Remove default credentials and unused features\n- Set security headers: CSP, HSTS, X-Frame-Options\n- Ensure error messages do not expose stack traces externally"
+    },
+    "deserialization": {
+      "patterns": [
+        "**/*serial*",
+        "**/*deserial*",
+        "**/*pickle*",
+        "**/*marshal*"
+      ],
+      "severity": "critical",
+      "guidance": "Unsafe deserialization can lead to remote code execution.\n- Never deserialize untrusted data with pickle or marshal\n- Use yaml.safe_load instead of yaml.load\n- Validate data integrity before deserialization\n- Prefer JSON over binary serialization for untrusted input"
+    },
+    "logging_monitoring": {
+      "patterns": [
+        "**/logging/**",
+        "**/audit/**",
+        "**/monitoring/**",
+        "**/telemetry/**"
+      ],
+      "severity": "warning",
+      "guidance": "Insufficient logging is a top OWASP risk.\n- Log all auth attempts, access failures, and sensitive operations\n- Never log passwords, tokens, or PII\n- Set up alerts for anomalous patterns\n- Ensure logs are tamper-proof and retained appropriately"
+    },
+    "error_handling": {
+      "patterns": [
+        "**/exceptions/**",
+        "**/*error_handler*",
+        "**/*exception*",
+        "**/handlers/**"
+      ],
+      "severity": "warning",
+      "guidance": "Errors must fail securely.\n- Never expose stack traces or internal paths to end users\n- Use generic messages externally, detailed logs internally\n- Ensure exception paths do not leave the system in an insecure state"
     }
   },
   "label_patterns": {
@@ -101,6 +163,30 @@
     "dependencies": {
       "severity": "warning",
       "guidance": "Dependency updates should be reviewed for known vulnerabilities. Use tools like npm audit or pip-audit to check for security issues."
+    },
+    "misconfiguration": {
+      "severity": "critical",
+      "guidance": "Ensure no insecure defaults are left in place. Disable DEBUG mode, enforce HTTPS, set security headers, and validate all environment-specific configurations before deployment."
+    },
+    "injection": {
+      "severity": "critical",
+      "guidance": "Prevent all injection classes — SQL, XSS, command, LDAP, and template injection. Use parameterized queries, safe ORM usage, output encoding, and a strict Content Security Policy."
+    },
+    "logging": {
+      "severity": "warning",
+      "guidance": "Ensure security-relevant events are logged (auth failures, access denials, input validation failures). Do not log sensitive data. Set up alerting for anomalous patterns and ensure log integrity."
+    },
+    "error-handling": {
+      "severity": "warning",
+      "guidance": "Errors should fail securely. Never expose internal details to users. Use generic messages externally and structured logging internally."
+    },
+    "insecure-design": {
+      "severity": "warning",
+      "guidance": "Flag design-level security flaws: missing rate limits, weak reset flows, absent threat modelling, or business logic that can be abused. Security must be designed in, not bolted on."
+    },
+    "deserialization": {
+      "severity": "critical",
+      "guidance": "Avoid unsafe deserialization of untrusted data. Use safe parsers, validate data integrity before deserialization, and never use pickle or similar formats with user-controlled input."
     }
   }
 }
